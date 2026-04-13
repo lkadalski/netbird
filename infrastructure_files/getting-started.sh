@@ -83,6 +83,15 @@ read_nb_domain() {
 }
 
 read_reverse_proxy_type() {
+  if [[ -n "${NETBIRD_REVERSE_PROXY:-}" ]]; then
+    if [[ ! "$NETBIRD_REVERSE_PROXY" =~ ^[0-5]$ ]]; then
+      echo "Invalid NETBIRD_REVERSE_PROXY value: '$NETBIRD_REVERSE_PROXY'. Must be 0-5." > /dev/stderr
+      exit 1
+    fi
+    echo "$NETBIRD_REVERSE_PROXY"
+    return 0
+  fi
+  
   echo "" > /dev/stderr
   echo "Which reverse proxy will you use?" > /dev/stderr
   echo "  [0] Traefik (recommended - automatic TLS, included in Docker Compose)" > /dev/stderr
@@ -167,6 +176,19 @@ read_proxy_docker_network() {
 }
 
 read_enable_proxy() {
+  if [[ -n "${NETBIRD_ENABLE_PROXY:-}" ]]; then
+    if [[ ! "$NETBIRD_ENABLE_PROXY" =~ ^[Yy]([Ee][Ss])?$|^[Nn][Oo]?$|^true$|^false$ ]]; then
+      echo "Invalid NETBIRD_ENABLE_PROXY value: '$NETBIRD_ENABLE_PROXY'. Must be y/n/yes/no/true/false." > /dev/stderr
+      exit 1
+    fi
+    if [[ "$NETBIRD_ENABLE_PROXY" =~ ^[Yy]([Ee][Ss])?$|^true$ ]]; then
+      echo "true"
+    else
+      echo "false"
+    fi
+    return 0
+  fi
+  
   echo "" > /dev/stderr
   echo "Do you want to enable the NetBird Proxy service?" > /dev/stderr
   echo "The proxy allows you to selectively expose internal NetBird network resources" > /dev/stderr
